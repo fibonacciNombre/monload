@@ -12,7 +12,7 @@ trait Job {
     val spark = SparkSession.builder()
         .appName(appName)
         .master("local[1]")//comentar al desplegar en spark
-        .config("spark.cassandra.connection.host", config.getString("bd.cassandra.url"))
+        //.config("spark.cassandra.connection.host", config.getString("bd.cassandra.url"))
         .getOrCreate()
         
     parseAndRun(spark, args, config)
