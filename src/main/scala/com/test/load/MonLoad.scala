@@ -47,7 +47,7 @@ object MonLoad extends Job{
     
     println("file --> " + preCustRDD.count)
     
-//    val readConfig2 = ReadConfig(Map("uri" -> "mongodb://ibk-pys:azYMYUYqMeQNCspBtdBrDw6j7NMbwm5r@ibk-pys-prod-shard-00-00-l3sed.mongodb.net:27017,ibk-pys-prod-shard-00-01-l3sed.mongodb.net:27017,ibk-pys-prod-shard-00-02-l3sed.mongodb.net:27017/pys?ssl=true&replicaSet=ibk-pys-prod-shard-0&authSource=admin",
+//    val readConfig2 = ReadConfig(Map("uri" -> "",
 //                "database" -> "premia",
 //                "collection" -> "coupons0117"
 //                //"shardKey" -> "{_id:1,customerId:1}"
@@ -59,7 +59,7 @@ object MonLoad extends Job{
     
     //println("db 099 --> " + ooo2.count)
     
-    val readConfig = ReadConfig(Map("uri" -> "mongodb://acdbeu2c002prmadev01:XaXUl8IhJXFToMhYB92SebetDErUlTB1hGODqdAPLwhryMf2dRfA8SWaxe4usgttJSW9GCKwqqfdpUokfjantQ==@acdbeu2c002prmadev01.documents.azure.com:10255/?ssl=true&replicaSet=globaldb",
+    val readConfig = ReadConfig(Map("uri" -> "",
                 "database" -> "movietickets",
                 "collection" -> "movieTicket"
                 //"shardKey" -> "{_id:1,customerId:1}"

@@ -13,8 +13,8 @@ trait Job {
         .appName(appName)
         .master("local[1]")//comentar al desplegar en spark
         //.config("spark.cassandra.connection.host", config.getString("bd.cassandra.url"))
-        .config("spark.mongodb.input.uri", "mongodb://acdbeu2c002prmadev01:XaXUl8IhJXFToMhYB92SebetDErUlTB1hGODqdAPLwhryMf2dRfA8SWaxe4usgttJSW9GCKwqqfdpUokfjantQ==@acdbeu2c002prmadev01.documents.azure.com:10255/premia.client?ssl=true&replicaSet=globaldb")
-        .config("spark.mongodb.output.uri", "mongodb://acdbeu2c002prmadev01:XaXUl8IhJXFToMhYB92SebetDErUlTB1hGODqdAPLwhryMf2dRfA8SWaxe4usgttJSW9GCKwqqfdpUokfjantQ==@acdbeu2c002prmadev01.documents.azure.com:10255/premia.coupons0117?ssl=true&replicaSet=globaldb")
+        .config("spark.mongodb.input.uri", "")
+        .config("spark.mongodb.output.uri", "")
         .getOrCreate()
         
     parseAndRun(spark, args, config)
