@@ -4,7 +4,7 @@ trait StorageModel {
   
 }
 
-case class LogCarga(
+case class PreCustomer(
     id: String,
-    profile: Long
+    profile: String
 )

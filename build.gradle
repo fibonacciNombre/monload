@@ -36,6 +36,8 @@ sourceSets {
 
 dependencies {
     // Use Scala 2.11 in our library project
+    
+    compile 'org.mongodb.spark:mongo-spark-connector_2.11:2.4.0'
     compile 'org.apache.spark:spark-core_2.11:2.2.0'
     compile 'org.apache.spark:spark-sql_2.11:2.2.0'
     compile 'org.scala-lang:scala-library:2.11.11'  
