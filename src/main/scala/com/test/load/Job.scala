@@ -13,8 +13,10 @@ trait Job {
         .appName(appName)
         .master("local[1]")//comentar al desplegar en spark
         //.config("spark.cassandra.connection.host", config.getString("bd.cassandra.url"))
-        .config("spark.mongodb.input.uri", "")
-        .config("spark.mongodb.output.uri", "")
+        //.config("spark.mongodb.input.uri", "mongodb://acdbeu2c002prmadev01:XaXUl8IhJXFToMhYB92SebetDErUlTB1hGODqdAPLwhryMf2dRfA8SWaxe4usgttJSW9GCKwqqfdpUokfjantQ==@acdbeu2c002prmadev01.documents.azure.com:10255/premia.customer0117?ssl=true&replicaSet=globaldb")
+        //.config("","mongodb://ibk-pys-des:oYcVgpiZTvTuwpAl@ibk-pys-shard-00-00-abhkn.mongodb.net:27017,ibk-pys-shard-00-01-abhkn.mongodb.net:27017,ibk-pys-shard-00-02-abhkn.mongodb.net:27017/premia.customer0117?ssl=true&replicaSet=ibk-pys-shard-0&authSource=admin")
+        //.config("spark.mongodb.output.uri", "mongodb://acdbeu2c002prmadev01:XaXUl8IhJXFToMhYB92SebetDErUlTB1hGODqdAPLwhryMf2dRfA8SWaxe4usgttJSW9GCKwqqfdpUokfjantQ==@acdbeu2c002prmadev01.documents.azure.com:10255/admin/premia.customer0117?ssl=true&replicaSet=globaldb")
+
         .getOrCreate()
         
     parseAndRun(spark, args, config)
