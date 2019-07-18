@@ -6,7 +6,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
 import org.bson.Document
 
-import com.mongodb.spark.MongoSpark
+import com.mongodb.spark._
 import com.mongodb.spark.config._
 import com.mongodb.spark.rdd.MongoRDD
 import com.test.load.model.PreCustomer
@@ -27,12 +27,15 @@ object MonLoad extends Job{
   override def run(spark:SparkSession,config: Config): Unit = {
     
     println("inicio --> " + appName)
-    
+     
+    import spark.sqlContext.implicits._
     
     val rccDataRDD: RDD[String] = spark.sparkContext.textFile("./in/load_customer.csv")
     
     
     rccDataRDD.foreach(f => println(f))
+    
+ 
     
     val preCustRDD: RDD[(String, PreCustomer)] = rccDataRDD.map(f => {
                                           (f.split(";")(0), 
@@ -47,13 +50,17 @@ object MonLoad extends Job{
     
     println("file --> " + preCustRDD.count)
     
-    val readConfig2 = ReadConfig(Map("uri" -> "mongodb://acdbeu2c002prmadev01:XaXUl8IhJXFToMhYB92SebetDErUlTB1hGODqdAPLwhryMf2dRfA8SWaxe4usgttJSW9GCKwqqfdpUokfjantQ==@acdbeu2c002prmadev01.documents.azure.com:10255/?ssl=true&replicaSet=globaldb",
+    val readConfig2 = ReadConfig(Map("uri" -> "",
                 "database" -> "premia",
                 "collection" -> "customer0117"
                 //"shardKey" -> "{_id:1,customerId:1}"
                 )) 
 
     val rdd = spark.sparkContext.loadFromMongoDB(readConfig2)
+    
+    println("db --> " + rdd.count)
+    
+   // rdd.toDF().printSchema()
 //    
 //    MongoSpark.save(ooo2)
     
@@ -78,7 +85,7 @@ object MonLoad extends Job{
 //    println("db 2 --> " + fromFile.count)
     //rdd.foreach(f => println(f))
 //    
-    fromFile.foreach(f => println("parrdd bd -->" + f))
+   // fromFile.foreach(f => println("parrdd bd -->" + f))
 ////    
     val uuu = preCustRDD.join(fromFile).map(f => {
       
@@ -101,17 +108,23 @@ object MonLoad extends Job{
     
 //    
     println("join")
-    uuu.foreach(f =>  println("join -->" + f))
+   // uuu.foreach(f =>  println("join -->" + f))
 //    
     
     val lefttodo = fromFile.leftOuterJoin( preCustRDD).filter(f => !f._2._2.nonEmpty).map(f => {(f._2._1)})
     
-    lefttodo.foreach(f =>  println("leftJoin -->" + f))
+    //lefttodo.foreach(f =>  println("leftJoin -->" + f))
     
     val kkk = uuu.union(lefttodo)
     
     
-    println("leftJoin --> " + kkk.count())
+   // println("leftJoin --> " + kkk.count())
+    
+    
+  
+    
+   
+    
 //    
   //  kkk.foreach(f =>  println("todo -->" + f))
 //    
@@ -141,9 +154,24 @@ object MonLoad extends Job{
 ////    //uuu.foreach(f => println(f))
 ////    println("join -->" + uuu.count())
 ////    
-////    val writeConfig = WriteConfig(Map("replaceDocument" -> "true", "shardKey" -> "{customerId:1}"), Some(WriteConfig(spark.sparkContext)))
+    println("todo -->" + kkk.count())
+    kkk.foreach(f => println(f))
+    
+    MongoConnector(readConfig2).withDatabaseDo(readConfig2, db => db.getCollection("customer0117").deleteMany(new Document))
+    
+    println("todo -->" + kkk.count())
+        val writeConfig = WriteConfig(Map("uri" -> "",
+                "database" -> "premia",
+                "collection" -> "customer0117"//,
+                //"replaceDocument" -> "true",
+                //"shardKey" -> "{_id_:1, customerId_1:1}"
+                //"shardKey" -> "{_id:1,customerId:1}"
+                )) 
+
 ////
-////    MongoSpark.save(uuu,writeConfig)
+    MongoSpark.save(kkk,writeConfig)
+    
+    //kkk.saveToMongoDB(writeConfig)
 ////    
 ////    
 ////    
