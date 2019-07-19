@@ -19,6 +19,8 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.functions.{max, min}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.bson.Document
+import com.test.load.model.FileCustomer
+import java.util.Calendar
 
 object MonLoad extends Job{
   
@@ -27,76 +29,72 @@ object MonLoad extends Job{
   override def run(spark:SparkSession,config: Config): Unit = {
     
     println("inicio --> " + appName)
+    val now = Calendar.getInstance().getTime()
+    println("inicio -- " + now)
      
     import spark.sqlContext.implicits._
     
-    val rccDataRDD: RDD[String] = spark.sparkContext.textFile("./in/load_customer.csv")
+    val rccDataRDD: RDD[String] = spark.sparkContext.textFile("./in/customer0117.csv")
     
-    
-    rccDataRDD.foreach(f => println(f))
+    println("nuevos --> " + rccDataRDD.count())
+    //rccDataRDD.foreach(f => println(f))
     
  
     
     val preCustRDD: RDD[(String, PreCustomer)] = rccDataRDD.map(f => {
-                                          (f.split(";")(0), 
+                                          (f.split(",")(0), 
                                               PreCustomer.tupled(
-                                                f.split(";")(0),
-                                                f.split(";")(1)))
+                                                f.split(",")(0),
+                                                f.split(",")(1)))
                                           }
-                                        )
+                                        ).reduceByKey((a,b) => a)
     
-    preCustRDD.foreach(f => println(f))
+    //preCustRDD.foreach(f => println(f))
                                        
+   
     
     println("file --> " + preCustRDD.count)
     
-    val readConfig2 = ReadConfig(Map("uri" -> "",
+    val readConfig2 = ReadConfig(Map(
+                "uri" -> "",               
                 "database" -> "premia",
                 "collection" -> "customer0117"
-                //"shardKey" -> "{_id:1,customerId:1}"
                 )) 
 
-    val rdd = spark.sparkContext.loadFromMongoDB(readConfig2)
+    //val rdd = spark.sparkContext.loadFromMongoDB(readConfig2)
+    
+    val rdd: RDD[String] = spark.sparkContext.textFile("./in/big_customer.csv")
+    
     
     println("db --> " + rdd.count)
     
-   // rdd.toDF().printSchema()
-//    
-//    MongoSpark.save(ooo2)
-    
-    //println("db 099 --> " + ooo2.count)
-//    
-//    val readConfig = ReadConfig(Map("uri" -> "",
-//                "database" -> "movietickets",
-//                "collection" -> "movieTicket"
-//                //"shardKey" -> "{_id:1,customerId:1}"
-//                )) 
-//
-//    val ooo = spark.sparkContext.loadFromMongoDB(readConfig)
-//    
-//    println("db 0 --> " + ooo.count)
-//    
-//    val rdd = MongoSpark.load(spark.sparkContext)
+
 ////    
 //    println("db 1 --> " + rdd.count)
 //    
-    val fromFile: RDD[(String, Document)] = rdd.map(f => (f.getString("customerId"),f))
+    val fromFile: RDD[(String, FileCustomer)] = rdd.map(f => (f.split(";")(0),FileCustomer.tupled(
+          f.split(";")(0),
+          f.split(";")(1),
+          f.split(";")(2),
+          f.split(";")(3),
+          true)))
 //    
 //    println("db 2 --> " + fromFile.count)
     //rdd.foreach(f => println(f))
 //    
    // fromFile.foreach(f => println("parrdd bd -->" + f))
-////    
+////  
+          
     val uuu = preCustRDD.join(fromFile).map(f => {
       
-      val pp = new Document("_id",f._2._2.get("_id"))
+      val pp = new Document()
       pp.put("customerId", f._1)
       
       val profi = f._2._1.profile.replace("[", "").replace("]", "").split(",").toList.asJava
-      pp.put("profile", profi)
-      pp.put("name", if(f._2._2.getString("name") != null) f._2._2.getString("name") else "nombre")
-      pp.put("lastName", if(f._2._2.getString("lastName") != null) f._2._2.getString("lastName") else "apellido")
-      pp.put("email", if(f._2._2.getString("email") != null) f._2._2.getString("email") else "email")
+      pp.put("profiles", profi)
+      pp.put("name", if(f._2._2.nombre != null) f._2._2.nombre else "nombre")
+      pp.put("lastName", if(f._2._2.apellido != null) f._2._2.apellido else "apellido")
+      pp.put("email", if(f._2._2.correo != null) f._2._2.correo else "email")
       pp.put("active", true)//if(f._2._2.getBoolean("active") != null) f._2._2.getBoolean("active") else false)
       
       (pp)
@@ -111,7 +109,17 @@ object MonLoad extends Job{
    // uuu.foreach(f =>  println("join -->" + f))
 //    
     
-    val lefttodo = fromFile.leftOuterJoin( preCustRDD).filter(f => !f._2._2.nonEmpty).map(f => {(f._2._1)})
+    val lefttodo = fromFile.leftOuterJoin( preCustRDD).filter(f => !f._2._2.nonEmpty).map(f => {(f._2._1)}).map(f =>{
+      val hhh = new Document("customerId", f.id)
+      val profi = "DEFAULT".split(",").toList.asJava
+      hhh.put("profiles", profi)
+      hhh.put("name", f.nombre)
+      hhh.put("lastName", f.apellido)
+      hhh.put("email", f.correo)
+      hhh.put("active", false)//if(f._2._2.getBoolean("active") != null) f._2._2.getBoolean("active") else false)
+      
+      hhh
+    })
     
     //lefttodo.foreach(f =>  println("leftJoin -->" + f))
     
@@ -119,71 +127,25 @@ object MonLoad extends Job{
     
     
    // println("leftJoin --> " + kkk.count())
-    
-    
-  
-    
-   
-    
-//    
-  //  kkk.foreach(f =>  println("todo -->" + f))
-//    
-//    val writeConfig = WriteConfig(Map("replaceDocument" -> "true", "shardKey" -> "{_id:1, customerId:1}"), Some(WriteConfig(spark.sparkContext)))
-//    
-    
-    //val op = preCustRDD.leftJoin(fromFile)
-    //MongoSpark.save(uuu)
-
-//    
-////    
-//////    val uuu = preCustRDD.leftOuterJoin(fromFile).map(f => {
-//////      
-//////     // val pp = new Document("_id",f._2._2.get.get("_id"))
-//////      val pp = new Document("customerId", f._1)
-//////      
-//////      val profi = f._2._1.profile.replace("[", "").replace("]", "").split(",").toList.asJava
-//////      pp.put("profile", profi)
-//////      pp.put("name",  "nombre")
-//////      pp.put("lastName",  "apellido")
-//////      pp.put("email",  "email")
-//////      pp.put("active", false)
-//////      
-//////      pp
-//////    })
-////    
-////    //uuu.foreach(f => println(f))
-////    println("join -->" + uuu.count())
-////    
+ 
     println("todo -->" + kkk.count())
-    kkk.foreach(f => println(f))
+    //kkk.foreach(f => println(f))
+   // kkk.saveAsTextFile("./in/todo.txt")
     
     MongoConnector(readConfig2).withDatabaseDo(readConfig2, db => db.getCollection("customer0117").deleteMany(new Document))
     
     println("todo -->" + kkk.count())
-        val writeConfig = WriteConfig(Map("uri" -> "",
+        val writeConfig = WriteConfig(Map(
+                "uri" -> "",
                 "database" -> "premia",
-                "collection" -> "customer0117"//,
-                //"replaceDocument" -> "true",
-                //"shardKey" -> "{_id_:1, customerId_1:1}"
-                //"shardKey" -> "{_id:1,customerId:1}"
+                "collection" -> "customer0117"
                 )) 
 
-////
     MongoSpark.save(kkk,writeConfig)
     
-    //kkk.saveToMongoDB(writeConfig)
-////    
-////    
-////    
-////    val doc = new Document("fruits", List("apples", "oranges", "pears").asJava)
-////    
-////    doc.put("customerId", "0060089638")
-////    
-////    println(doc)
-////    println(doc.get("fruits"))
-////    println(rdd.first.toJson)
-////    
-////    
+     val fin = Calendar.getInstance().getTime()
+    println("inicio -- " + fin)
+ 
   }
   
 }
