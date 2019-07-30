@@ -8,7 +8,7 @@ trait Job {
   def main(args: Array[String]): Unit = {
     
     val config = ConfigFactory.load()
-    
+   // System.setProperty("hadoop.home.dir", "C:\\David\\sw\\hadoop");
     val spark = SparkSession.builder()
         .appName(appName)
         .master("local[1]")//comentar al desplegar en spark
