@@ -39,11 +39,11 @@ dependencies {
     
     compile 'org.mongodb.spark:mongo-spark-connector_2.11:2.4.0'
    // compile 'com.microsoft.azure:azure-cosmosdb-spark_2.4.0_2.11:1.4.0'
-    compile 'org.apache.spark:spark-core_2.11:2.2.0'
-    compile 'org.apache.spark:spark-sql_2.11:2.2.0'
-    compile 'org.scala-lang:scala-library:2.11.11'  
+    implementation 'org.apache.spark:spark-core_2.11:2.2.0'
+    implementation 'org.apache.spark:spark-sql_2.11:2.2.0'
+    implementation 'org.scala-lang:scala-library:2.11.11'  
     compile 'org.apache.hadoop:hadoop-azure:2.7.3'
-    compile 'org.apache.avro:avro-compiler:1.8.2'
+    //compile 'org.apache.avro:avro-compiler:1.8.2'
     compile 'com.typesafe:config:1.3.1'
     //compile 'com.commercehub.gradle.plugin:gradle-avro-plugin:0.10.0'
 
@@ -75,15 +75,15 @@ task copySource(type: Copy){
 
 compileJava.dependsOn copySource*/
 
-/*jar {
+jar {
     classifier = 'all'
-    archiveName = "CargaDiaria-spark.jar"
+    archiveName = "loadmonthly.jar"
     manifest {
-        attributes 'Main-Class': 'com.bcp.negative.CargaDiaria'
+        attributes 'Main-Class': 'com.test.load.MonLoad'
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
     }
     exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
     zip64 true
-}*/
+}

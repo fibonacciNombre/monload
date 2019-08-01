@@ -11,7 +11,7 @@ trait Job {
    // System.setProperty("hadoop.home.dir", "C:\\David\\sw\\hadoop");
     val spark = SparkSession.builder()
         .appName(appName)
-        .master("local[1]")//comentar al desplegar en spark
+        //.master("local[1]")//comentar al desplegar en spark
         //.config("spark.cassandra.connection.host", config.getString("bd.cassandra.url"))
         //.config("spark.mongodb.input.uri", "")
         //.config("","")
